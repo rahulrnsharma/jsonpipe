@@ -1,457 +1,377 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSONPipe - JSON Formatter</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Courier New', monospace;
-            background: #fff;
-            color: #000;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .header {
-            background: #f8f9fa;
-            color: #000;
-            padding: 12px 20px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .editors-container {
-            display: flex;
-            height: calc(100vh - 50px);
-            width: 100vw;
-        }
-
-        .editor-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #dee2e6;
-        }
-
-        .editor-panel:last-child {
-            border-right: none;
-        }
-
-        .editor-header {
-            background: #e9ecef;
-            padding: 8px 12px;
-            font-size: 12px;
-            border-bottom: 1px solid #dee2e6;
-            color: #000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .copy-btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .copy-btn:hover {
-            background: #0056b3;
-        }
-
-        .copy-btn.copied {
-            background: #28a745;
-        }
-
-        .copy-tree-text {
-            position: absolute;
-            opacity: 0;
-            z-index: -1;
-        }
-
-        /* Line numbers styling */
-        .line-numbers {
-            background: #f8f9fa;
-            width: 50px;
-            padding: 12px 4px;
-            font-size: 13px;
-            line-height: 1.5;
-            user-select: none;
-            overflow: hidden;
-            border-right: 1px solid #dee2e6;
-            text-align: right;
-            color: #6c757d;
-            font-family: 'Courier New', monospace;
-            white-space: pre;
-        }
-
-        .editor-content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .editor-textarea {
-            flex: 1;
-            background: #fff;
-            color: #000;
-            border: none;
-            outline: none;
-            padding: 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            resize: none;
-            white-space: pre;
-            overflow-y: auto;
-        }
-
-        .json-tree {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            background: #fff;
-            color: #000;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .tree-node {
-            margin: 2px 0;
-            cursor: pointer;
-            display: flex;
-            align-items: flex-start;
-            padding: 2px 0;
-            color: #000;
-            position: relative;
-        }
-
-        .tree-node:hover {
-            background: #f8f9fa;
-        }
-
-        .tree-toggle {
-            margin-right: 8px;
-            color: #007bff;
-            font-weight: bold;
-            font-size: 12px;
-            line-height: 1.3;
-            flex-shrink: 0;
-            user-select: none;
-            width: 12px;
-        }
-
-        .tree-key {
-            color: #dc3545;
-            font-weight: bold;
-            margin-right: 6px;
-            flex-shrink: 0;
-        }
-
-        .tree-colon {
-            color: #000;
-            margin-right: 6px;
-            flex-shrink: 0;
-        }
-
-        .tree-string { color: #28a745; }
-        .tree-number { color: #ffc107; }
-        .tree-boolean { color: #6f42c1; }
-        .tree-null { color: #6c757d; }
-
-        .tree-children {
-            display: none;
-            margin-left: 20px;
-            border-left: 1px solid #dee2e6;
-            padding-left: 8px;
-            margin-top: 2px;
-        }
-
-        .tree-children.expanded {
-            display: block;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f8f9fa;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #adb5bd;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6c757d;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JSON Formatter</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      background:#f8f9fa;
+      color:#212529;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    header {
+      background:white;
+      border-bottom:1px solid #dee2e6;
+      padding:10px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-shrink:0;
+    }
+    h1 { font-size:17px; font-weight:600; color:#343a40; }
+    .btn {
+      padding:7px 16px;
+      font-size:13px;
+      font-weight:500;
+      border-radius:6px;
+      border:none;
+      cursor:pointer;
+      transition:all 0.13s;
+    }
+    .btn-clear { background:#e9ecef; color:#495057; }
+    .btn-clear:hover { background:#dee2e6; }
+    .btn-copy { background:#4fc3f7; color:white; }
+    .btn-copy:hover { background:#29b6f6; }
+    .main { flex:1; display:flex; overflow:hidden; }
+    .side { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .side.left { border-right:1px solid #dee2e6; }
+    .header-bar {
+      padding:6px 12px;
+      background:#f1f3f5;
+      border-bottom:1px solid #dee2e6;
+      font-size:11px;
+      font-weight:600;
+      color:#6c757d;
+      text-transform:uppercase;
+      letter-spacing:0.4px;
+    }
+    .editor-area, .preview-area {
+      flex:1;
+      position:relative;
+      overflow:hidden;
+    }
+    .gutter {
+      position:absolute;
+      left:0; top:0; bottom:0;
+      width:44px;
+      background:#f8f9fa;
+      border-right:1px solid #dee2e6;
+      color:#adb5bd;
+      font-size:12px;
+      text-align:right;
+      padding-top:4px;
+      line-height:1.55;
+      user-select:none;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    textarea#jsonInput {
+      position:absolute;
+      inset:0 0 0 44px;
+      width:calc(100% - 44px);
+      height:100%;
+      padding:4px 12px;
+      font-size:13.5px;
+      line-height:1.55;
+      border:none;
+      outline:none;
+      resize:none;
+      background:white;
+      tab-size:2;
+      white-space:pre;
+      overflow-x:auto;
+    }
+    #preview {
+      position:absolute;
+      inset:0 0 0 44px;
+      width:calc(100% - 44px);
+      height:100%;
+      padding:4px 12px;
+      font-size:13.5px;
+      line-height:1.55;
+      overflow:auto;
+      background:white;
+    }
+    .node {
+      white-space: pre;
+      display: flex;
+      flex-direction: column;
+    }
+    .node.collapsed > .node-children { display: none; }
+    .header-row {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: nowrap;
+      gap: 3px;
+    }
+    .toggle {
+      display: inline-block;
+      width: 1.1em;
+      text-align: center;
+      color: #495057;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.95em;
+    }
+    .toggle:hover { color: #060707; }
+    .key     { color: #6e2e81; font-weight: 600; }
+    .string  { color: #579f23 }
+    .number  { color: #d04551; }
+    .boolean { color: #387fb8; font-weight: 600; }
+    .null    { color: #d08239; font-style: italic; }
+    .brace   { color: #262f2f; font-weight: bold; }
+    .ellipsis { color: #858585; }
+    .comma   { color: #7f8c8d; margin-left: 2px; }
+    .children { margin-left: 1.8em; }
+    .empty, .error-msg {
+      color: #6c757d;
+      font-size: 14px;
+    }
+    .error-msg { color: #dc3545; background: #fff5f5; }
+  </style>
 </head>
 <body>
-    <div class="header">JSONPipe - JSON Formatter</div>
-    
-    <div class="editors-container">
-        <!-- Left Panel - Input -->
-        <div class="editor-panel">
-            <div class="editor-header">
-                <span>📥 RAW INPUT</span>
-            </div>
-            <div class="editor-content">
-                <div class="line-numbers" id="inputLines">1</div>
-                <textarea class="editor-textarea" id="jsonInput" spellcheck="false" placeholder="Place you json here"></textarea>
-            </div>
-        </div>
 
-        <!-- Right Panel - Tree View -->
-        <div class="editor-panel">
-            <div class="editor-header">
-                <span>🌳 JSON TREE VIEW</span>
-                <button class="copy-btn" id="copyTreeBtn" title="Copy entire tree as formatted JSON">📋 Copy All</button>
-            </div>
-            <div class="editor-content">
-                <div class="line-numbers" id="treeLines">1</div>
-                <div class="json-tree" id="jsonTree">
-                    Paste JSON on left to see tree view...
-                </div>
-                <!-- Hidden element for proper JSON copying -->
-                <textarea class="copy-tree-text" id="copyTreeText"></textarea>
-            </div>
-        </div>
+<header>
+  <h1>JSON Formatter</h1>
+  <div>
+    <button class="btn btn-clear" id="clearBtn">Clear</button>
+    <button class="btn btn-copy" id="copyBtn">Copy Preview</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="side left">
+    <div class="header-bar">INPUT</div>
+    <div class="editor-area">
+      <div class="gutter" id="inputLines"></div>
+      <textarea id="jsonInput" spellcheck="false" placeholder="Paste your JSON here..."></textarea>
     </div>
+  </div>
 
-    <script>
-        const jsonInput = document.getElementById('jsonInput');
-        const jsonTree = document.getElementById('jsonTree');
-        const inputLines = document.getElementById('inputLines');
-        const treeLines = document.getElementById('treeLines');
-        const copyTreeBtn = document.getElementById('copyTreeBtn');
-        const copyTreeText = document.getElementById('copyTreeText');
+  <div class="side">
+    <div class="header-bar">PREVIEW</div>
+    <div class="preview-area">
+      <div class="gutter" id="previewLines"></div>
+      <div id="preview">
+        <div class="empty">Paste JSON to see formatted preview</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        let parsedData = null;
+<script>
+// ────────────────────────────────────────────────
+const input       = document.getElementById('jsonInput');
+const preview     = document.getElementById('preview');
+const inputLines  = document.getElementById('inputLines');
+const previewLines= document.getElementById('previewLines');
+const copyBtn     = document.getElementById('copyBtn');
+const clearBtn    = document.getElementById('clearBtn');
 
-        // Copy to clipboard with feedback
-        async function copyToClipboard(text, button = null) {
-            try {
-                await navigator.clipboard.writeText(text);
-                if (button) {
-                    button.textContent = '✅ Copied!';
-                    button.classList.add('copied');
-                    setTimeout(() => {
-                        button.textContent = '📋 Copy All';
-                        button.classList.remove('copied');
-                    }, 1500);
-                }
-            } catch (err) {
-                // Fallback for older browsers
-                copyTreeText.value = text;
-                copyTreeText.select();
-                document.execCommand('copy');
-            }
-        }
+let currentData = null;
 
-        // Update line numbers for textarea
-        function updateInputLineNumbers() {
-            const lines = jsonInput.value.split('\n').length;
-            inputLines.textContent = Array.from({length: Math.max(lines, 1)}, (_, i) => i + 1).join('\n');
-        }
+// ─── Helpers ───────────────────────────────────────
+function escape(s) {
+  return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'} [m]));
+}
 
-        // Update line numbers for tree
-        function updateTreeLineNumbers() {
-            const visibleLines = [];
-            const walker = document.createTreeWalker(
-                jsonTree,
-                NodeFilter.SHOW_ELEMENT,
-                {
-                    acceptNode: function(node) {
-                        if (node.classList && node.classList.contains('tree-node')) {
-                            return NodeFilter.FILTER_ACCEPT;
-                        }
-                        return NodeFilter.FILTER_SKIP;
-                    }
-                }
-            );
-            
-            let count = 1;
-            while (walker.nextNode()) {
-                visibleLines.push(count++);
-            }
-            
-            treeLines.textContent = Array.from({length: Math.max(visibleLines.length || 1, 1)}, (_, i) => i + 1).join('\n');
-        }
+function countLines(str) {
+  return (str.match(/\n/g) || []).length + (str ? 1 : 0);
+}
 
-        // Sync scroll between line numbers and content
-        function syncScroll(contentEl, lineEl) {
-            contentEl.onscroll = function() {
-                lineEl.scrollTop = contentEl.scrollTop;
-            };
-        }
+function syncLines(source, linesEl) {
+  if (!source) return;
+  const text = source.value || source.textContent || '';
+  const count = countLines(text);
+  let html = '';
+  for(let i = 1; i <= count; i++) html += i + '\n';
+  linesEl.textContent = html;
+  linesEl.scrollTop = source.scrollTop;
+}
 
-        // Generate properly formatted JSON string
-        function getFormattedJson() {
-            if (!parsedData) return '';
-            try {
-                return JSON.stringify(parsedData, null, 2);
-            } catch (e) {
-                return '';
-            }
-        }
+// ─── Node renderer ──────────────────────────────────
+function createNode(value, isLast = true, depth = 0) {
+  const container = document.createElement('div');
+  container.className = 'node';
 
-        // Create tree structure (VISUAL ONLY - doesn't affect copying)
-        function createTree(obj, keyName = 'root') {
-            if (obj === null) return `<span class="tree-null">null</span>`;
-            if (obj === undefined) return `<span class="tree-null">undefined</span>`;
-            
-            if (typeof obj !== 'object') {
-                const type = typeof obj;
-                return `<span class="tree-${type}">${JSON.stringify(obj)}</span>`;
-            }
+  // ── Primitives ────────────────────────────────────
+  if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    const row = document.createElement('div');
+    row.className = 'header-row';
 
-            const isArray = Array.isArray(obj);
-            const isRoot = keyName === 'root';
-            
-            let html = `<div class="tree-node" data-key="${keyName}">`;
-            html += `<span class="tree-toggle">${isRoot ? '▽' : '▸'}</span>`;
-            
-            if (!isRoot) {
-                html += `<span class="tree-key">"${keyName}"</span><span class="tree-colon">:</span> `;
-            }
-            
-            // Preview content
-            if (isArray && obj.length > 0) {
-                const preview = obj.slice(0, 2).map(v => typeof v === 'object' ? '{...}' : JSON.stringify(v)).join(', ');
-                html += `<span class="tree-string">[${preview}${obj.length > 2 ? '...' : ''}]</span>`;
-            } else if (!isArray && Object.keys(obj).length > 0) {
-                const firstKey = Object.keys(obj)[0];
-                html += `<span style="color:#17a2b8">{ "${firstKey}": ... }</span>`;
-            } else if (isArray) {
-                html += `<span class="tree-string">[]</span>`;
-            } else {
-                html += `<span style="color:#17a2b8">{}</span>`;
-            }
-            
-            html += `</div><div class="tree-children ${isRoot ? 'expanded' : ''}">`;
-            
-            const keys = isArray ? obj.map((_, i) => i.toString()) : Object.keys(obj);
-            
-            keys.forEach(key => {
-                const value = obj[key];
-                if (typeof value !== 'object' || value === null) {
-                    html += `<div class="tree-node leaf-node">`;
-                    html += `<span class="tree-toggle">•</span>`;
-                    html += `<span class="tree-key">"${key}"</span><span class="tree-colon">:</span> `;
-                    html += createTree(value);
-                    html += `</div>`;
-                } else {
-                    html += createTree(value, key);
-                }
-            });
-            
-            html += '</div>';
-            return html;
-        }
+    const content = document.createElement('span');
+    if (value === null) {
+      content.className = 'null';
+      content.textContent = 'null';
+    } else if (typeof value === 'string') {
+      content.className = 'string';
+      content.textContent = `"${escape(value)}"`;
+    } else if (typeof value === 'number') {
+      content.className = 'number';
+      content.textContent = value;
+    } else {
+      content.className = 'boolean';
+      content.textContent = value;
+    }
 
-        function toggleNode(event, node) {
-            const treeNode = node || event.currentTarget;
-            const toggle = treeNode.querySelector('.tree-toggle');
-            const children = treeNode.nextElementSibling;
-            
-            if (!children || !children.classList.contains('tree-children')) return;
-            
-            const isExpanded = children.classList.contains('expanded');
-            toggle.textContent = isExpanded ? '▸' : '▽';
-            children.classList.toggle('expanded');
-            
-            setTimeout(updateTreeLineNumbers, 50);
-        }
+    row.appendChild(content);
 
-        // Main update function
-        function updateEditor() {
-            updateInputLineNumbers();
-            
-            const input = jsonInput.value.trim();
-            
-            if (!input) {
-                jsonTree.innerHTML = 'Paste JSON on left to see tree view...';
-                copyTreeText.value = '';
-                updateTreeLineNumbers();
-                return;
-            }
+    if (!isLast) {
+      const comma = document.createElement('span');
+      comma.className = 'comma';
+      comma.textContent = ',';
+      row.appendChild(comma);
+    }
 
-            try {
-                const parsed = JSON.parse(input);
-                parsedData = parsed;
-                
-                // Update hidden textarea with PROPER JSON for copying
-                copyTreeText.value = getFormattedJson();
-                
-                // Create visual tree (just for display)
-                jsonTree.innerHTML = createTree(parsed, 'root');
-                
-                // Add click handlers for tree toggles
-                document.querySelectorAll('.tree-node').forEach(node => {
-                    node.onclick = (e) => toggleNode(e, node);
-                });
-                
-                updateTreeLineNumbers();
-                
-            } catch (e) {
-                jsonTree.innerHTML = `<div style="color:#dc3545">❌ Error: ${e.message}</div>`;
-                copyTreeText.value = '';
-                updateTreeLineNumbers();
-            }
-        }
+    container.appendChild(row);
+    return container;
+  }
 
-        // Copy button handler - copies from hidden textarea with perfect JSON
-        copyTreeBtn.addEventListener('click', () => {
-            const jsonString = copyTreeText.value;
-            if (jsonString) {
-                copyToClipboard(jsonString, copyTreeBtn);
-            }
-        });
+  // ── Objects & Arrays ──────────────────────────────
+  const isArray = Array.isArray(value);
+  const isEmpty = isArray ? value.length === 0 : Object.keys(value).length === 0;
 
-        // Prevent tree selection from interfering with copying
-        jsonTree.addEventListener('selectstart', (e) => {
-            e.stopPropagation();
-        });
+  const header = document.createElement('div');
+  header.className = 'header-row';
 
-        // Event listeners
-        jsonInput.addEventListener('input', updateEditor);
-        jsonInput.addEventListener('scroll', updateInputLineNumbers);
-        jsonInput.addEventListener('paste', () => setTimeout(updateEditor, 10));
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
-                e.preventDefault();
-                updateEditor();
-            }
-        });
+  const toggle = document.createElement('span');
+  toggle.className = 'toggle';
+  toggle.textContent = isEmpty ? '' : '▾';
 
-        // Initialize
-        window.addEventListener('load', () => {
-            syncScroll(jsonInput, inputLines);
-            syncScroll(jsonTree, treeLines);
-            updateEditor();
-            jsonInput.focus();
-        });
-    </script>
+  const openBrace = document.createElement('span');
+  openBrace.className = 'brace';
+  openBrace.textContent = isArray ? '[' : '{';
+
+  const ellipsis = document.createElement('span');
+  ellipsis.className = 'ellipsis';
+  ellipsis.textContent = '…';
+
+  const closeBrace = document.createElement('span');
+  closeBrace.className = 'brace';
+  closeBrace.textContent = isArray ? ']' : '}';
+
+  if (!isLast) {
+    const comma = document.createElement('span');
+    comma.className = 'comma';
+    comma.textContent = ',';
+    closeBrace.appendChild(comma);
+  }
+
+  header.append(toggle, openBrace);
+
+  const children = document.createElement('div');
+  children.className = 'node-children';
+
+  if (isEmpty) {
+    header.appendChild(closeBrace);
+  } else {
+    header.append(ellipsis, closeBrace);
+
+    if (isArray) {
+      value.forEach((item, i) => {
+        const child = createNode(item, i === value.length - 1, depth + 1);
+        children.appendChild(child);
+      });
+    } else {
+      const entries = Object.entries(value);
+      entries.forEach(([key, val], i) => {
+        const line = document.createElement('div');
+        line.className = 'header-row';
+
+        const keySpan = document.createElement('span');
+        keySpan.className = 'key';
+        keySpan.textContent = `"${escape(key)}": `;
+
+        const valueNode = createNode(val, i === entries.length - 1, depth + 1);
+
+        line.append(keySpan, valueNode);
+        children.appendChild(line);
+      });
+    }
+  }
+
+  toggle.onclick = (e) => {
+    e.stopPropagation();
+    if (isEmpty) return;
+    container.classList.toggle('collapsed');
+    toggle.textContent = container.classList.contains('collapsed') ? '▸' : '▾';
+    syncLines(null, previewLines);
+  };
+
+  // Root expanded, nested collapsed
+  if (depth === 0) {
+    container.classList.remove('collapsed');
+    toggle.textContent = isEmpty ? '' : '▾';
+  } else {
+    container.classList.add('collapsed');
+    toggle.textContent = isEmpty ? '' : '▸';
+  }
+
+  container.appendChild(header);
+  if (!isEmpty) container.appendChild(children);
+
+  return container;
+}
+
+function renderPreview() {
+  const txt = input.value.trim();
+  if (!txt) {
+    preview.innerHTML = '<div class="empty">Paste JSON to see formatted preview</div>';
+    syncLines(null, previewLines);
+    currentData = null;
+    return;
+  }
+
+  try {
+    const data = JSON.parse(txt);
+    currentData = data;
+
+    preview.innerHTML = '';
+    preview.appendChild(createNode(data, true, 0));
+
+    syncLines(null, previewLines);
+  } catch (err) {
+    preview.innerHTML = `<div class="error-msg">Invalid JSON<br>${err.message}</div>`;
+    currentData = null;
+    syncLines(null, previewLines);
+  }
+}
+
+// ─── Events ─────────────────────────────────────────
+input.addEventListener('input', () => {
+  syncLines(input, inputLines);
+  renderPreview();
+});
+
+input.addEventListener('scroll', () => syncLines(input, inputLines));
+preview.addEventListener('scroll', () => syncLines(preview, previewLines));
+
+copyBtn.addEventListener('click', async () => {
+  if (!currentData) return alert('No valid JSON');
+  const pretty = JSON.stringify(currentData, null, 2);
+  await navigator.clipboard.writeText(pretty).catch(console.error);
+  copyBtn.textContent = 'Copied!';
+  setTimeout(() => copyBtn.textContent = 'Copy Preview', 1400);
+});
+
+clearBtn.addEventListener('click', () => {
+  input.value = '';
+  preview.innerHTML = '<div class="empty">Paste JSON to see formatted preview</div>';
+  syncLines(input, inputLines);
+  syncLines(null, previewLines);
+});
+
+// Init
+syncLines(input, inputLines);
+renderPreview();
+
+</script>
 </body>
 </html>
